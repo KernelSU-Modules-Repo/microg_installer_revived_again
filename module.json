@@ -1,0 +1,12 @@
+{
+  "metamodule": false,
+  "summary": "Promote microG GmsCore, GsfProxy, Companion/Play Store and MapsV1 to system with privileged permissions",
+  "sourceUrl": "https://github.com/spacealtctrl/microg_installer_revived_again",
+  "additionalAuthors": [
+    {
+      "type": "add",
+      "name": "spacealtctrl",
+      "link": "https://github.com/spacealtctrl"
+    }
+  ]
+}
