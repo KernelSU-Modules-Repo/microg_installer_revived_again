@@ -60,6 +60,7 @@ jobs:
         uses: KernelSU-Modules-Repo/module_release@main
         with:
           tag_name: ${{ matrix.tag }}
+          name: "microG Installer Revived.... again - ${{ matrix.tag }}"
           make_latest: ${{ matrix.tag == needs.get_tags.outputs.latest }}
           file: "${{ env.MODULE_NAME }}.zip"
           body: ${{ env.RELEASE_BODY }}
