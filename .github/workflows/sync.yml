@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [sync-release]
+  schedule:
+    - cron: '0 4 * * *'
 
 permissions:
   id-token: write
@@ -26,12 +28,12 @@ jobs:
         id: check
         run: |
           # Only consider v-prefixed tags so non-conforming source tags (e.g. an accidental no-v tag) never trigger a mirror sync
-          SOURCE_TAGS=$(gh api repos/$SOURCE_REPO/tags | jq -r '.[].name' | grep '^v' | sort)
-          CURRENT_TAGS=$(gh api repos/$GITHUB_REPOSITORY/tags | jq -r '.[].name' | grep '^v' | sort)
-          MISSING=$(comm -23 <(echo "$SOURCE_TAGS") <(echo "$CURRENT_TAGS"))
+          SOURCE_TAGS=$(gh api repos/$SOURCE_REPO/tags | jq -r '.[].name' | grep '^v')
+          CURRENT_TAGS=$(gh api repos/$GITHUB_REPOSITORY/tags | jq -r '.[].name' | grep '^v')
+          MISSING=$(comm -23 <(echo "$SOURCE_TAGS" | sort) <(echo "$CURRENT_TAGS" | sort))
           MISSING_JSON=$(echo "$MISSING" | jq -R -s -c 'split("\n")[:-1] | map(select(. != ""))')
           echo "tags=$MISSING_JSON" >> $GITHUB_OUTPUT
-          LATEST=$(echo "$SOURCE_TAGS" | tail -1)
+          LATEST=$(echo "$SOURCE_TAGS" | sort -V | tail -1)
           echo "latest=$LATEST" >> $GITHUB_OUTPUT
 
   release:
