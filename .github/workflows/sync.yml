@@ -30,8 +30,15 @@ jobs:
           # Only consider v-prefixed tags so non-conforming source tags (e.g. an accidental no-v tag) never trigger a mirror sync
           SOURCE_TAGS=$(gh api repos/$SOURCE_REPO/tags | jq -r '.[].name' | grep '^v')
           CURRENT_TAGS=$(gh api repos/$GITHUB_REPOSITORY/tags | jq -r '.[].name' | grep '^v')
-          MISSING=$(comm -23 <(echo "$SOURCE_TAGS" | sort) <(echo "$CURRENT_TAGS" | sort))
-          MISSING_JSON=$(echo "$MISSING" | jq -R -s -c 'split("\n")[:-1] | map(select(. != ""))')
+          MIRROR_LATEST=$(echo "$CURRENT_TAGS" | sort -V | tail -1)
+          MISSING=$(comm -23 <(echo "$SOURCE_TAGS" | sort) <(echo "$CURRENT_TAGS" | sort) \
+            | while read -r t; do
+                [ -n "$t" ] || continue
+                if [ "$t" != "$MIRROR_LATEST" ] && [ "$(printf '%s\n%s\n' "$MIRROR_LATEST" "$t" | sort -V | tail -1)" = "$t" ]; then
+                  echo "$t"
+                fi
+              done)
+          MISSING_JSON=$(echo "$MISSING" | jq -R -s -c 'split("\n") | map(select(. != ""))')
           echo "tags=$MISSING_JSON" >> $GITHUB_OUTPUT
           LATEST=$(echo "$SOURCE_TAGS" | sort -V | tail -1)
           echo "latest=$LATEST" >> $GITHUB_OUTPUT
